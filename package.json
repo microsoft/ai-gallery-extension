@@ -1,6 +1,7 @@
 {
   "name": "ai-gallery",
   "displayName": "AI Gallery",
+  "publisher": "ai-gallery",
   "description": "",
   "version": "0.0.1",
   "engines": {
