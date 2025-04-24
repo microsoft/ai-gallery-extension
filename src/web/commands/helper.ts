@@ -7,6 +7,13 @@ export async function decodingUserPrompt(encoded: string): Promise<string> {
     return prompt;
 }
 
+// This function decodingUserPrompt but return Json object
+export async function decodingUserPromptJson(encoded: string): Promise<any> {
+    const json = await decompressEncodingUrl(encoded);
+    const data = JSON.parse(json);
+    return data;
+}
+
 async function decompressEncodingUrl(compressed: string): Promise<string> {
     let decoded = compressed.replace(/-/g, '+').replace(/_/g, '/');
     while (decoded.length % 4) decoded += '=';
