@@ -33,7 +33,8 @@
     "package-web": "webpack --mode production --devtool hidden-source-map",
     "lint": "eslint src --ext ts",
     "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. .",
-    "host": "serve --ssl-cert localhost+1.pem --ssl-key localhost+1-key.pem --cors -l 3002"
+    "host": "serve --ssl-cert localhost+1.pem --ssl-key localhost+1-key.pem --cors -l 3002",
+    "build": "npm run compile-web"
   },
   "devDependencies": {
     "@types/assert": "^1.5.10",
