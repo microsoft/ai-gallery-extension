@@ -1,14 +1,77 @@
 import * as vscode from 'vscode';
-import { decodingUserPrompt } from './helper';
+import { decodingUserPrompt, decodingUserPromptJson } from './helper';
+import { aiConnectionString } from '../constants';
+import TelemetryReporter from '@vscode/extension-telemetry';
 
 export async function executePromptCmd(galleryPromptParameter: string) {
     let galleryPromptEncoded = galleryPromptParameter;
-    if (galleryPromptEncoded === null || galleryPromptEncoded === undefined || galleryPromptEncoded === "") {
-        const url = (await vscode.commands.executeCommand('vscode-dev-azurecloudshell.webOpener.getUrl') as { url: string }).url;
-        galleryPromptEncoded = new URLSearchParams(url).get('aiGalleryParam') ?? "";
+
+    const reporter = new TelemetryReporter(aiConnectionString);
+    let executeResult = false;
+    let galleryPromptEncodedSize = 0;
+    let galleryPromptDecodedSize = 0;
+    let promptVersion = 0;
+    let errorMessage = "";
+
+    try {
+        if (galleryPromptEncoded === null || galleryPromptEncoded === undefined || galleryPromptEncoded === "") {
+            const url = (await vscode.commands.executeCommand('vscode-dev-azurecloudshell.webOpener.getUrl') as { url: string }).url;
+            galleryPromptEncoded = new URLSearchParams(url).get('aiGalleryParam') ?? "";
+        }
+
+        if (galleryPromptEncoded !== "") {
+            const galleryPromptdecoded = await decodingUserPromptJson(galleryPromptEncoded);
+            promptVersion = galleryPromptdecoded.v;
+
+            // Telemetry data
+            galleryPromptEncodedSize = galleryPromptEncoded.length;
+            galleryPromptDecodedSize = JSON.stringify(galleryPromptdecoded).length;
+
+            const success = await tryOpenPrompt(galleryPromptdecoded.p);
+            if (success) {
+                executeResult = true;
+            }
+            else {
+                errorMessage = "Failed to open the prompt.";
+            }
+        }
+        else {
+            errorMessage = "Gallery prompt is empty. Please check the URL.";
+        }
     }
-    if (galleryPromptEncoded !== "") {
-        const galleryPromptdecoded = await decodingUserPrompt(galleryPromptEncoded);
-        await vscode.commands.executeCommand("workbench.action.chat.open", galleryPromptdecoded);
+    catch (error) {
+        errorMessage = error instanceof Error ? error.message : String(error);
     }
+    finally {
+        reporter.sendTelemetryEvent('gallerypassingpromptresult',
+            {
+                passedResult: executeResult.toString(),
+                errorMessage: errorMessage,
+            },
+            {
+                promptVersion: promptVersion,
+                galleryPromptEncodedSize: galleryPromptEncodedSize,
+                galleryPromptDecodedSize: galleryPromptDecodedSize,
+            }
+        );
+    }
+
+}
+
+async function tryOpenPrompt(prompt: string, retries = 3, delay = 1000): Promise<boolean> {
+    for (let attempt = 0; attempt < retries; attempt++) {
+        try {
+            await vscode.commands.executeCommand("workbench.action.chat.open", prompt);
+            return true;
+        } catch (err) {
+            console.warn(`Attempt ${attempt + 1} failed to open chat. Retrying...`, err);
+            if (attempt < retries - 1) {
+                await new Promise(res => setTimeout(res, delay));
+            }
+            else {
+                throw new Error(`Failed to open chat after ${retries} attempts. ` + err);
+            }
+        }
+    }
+    return false;
 }
