@@ -28,7 +28,7 @@ export async function executePromptCmd(galleryPromptParameter: string) {
             galleryPromptDecodedSize = JSON.stringify(galleryPromptdecoded).length;
 
             await trySetupChat();
-            vscode.window.showInformationMessage("AI Gallery: Chat is setup. Passing prompt...");
+            vscode.window.showInformationMessage("AI Gallery: Loading completed. Start generating code by prompt.");
 
             const success = await tryOpenPrompt(galleryPromptdecoded.p);
             if (success) {
@@ -37,7 +37,6 @@ export async function executePromptCmd(galleryPromptParameter: string) {
             else {
                 errorMessage = "Failed to open the prompt.";
             }
-            vscode.window.showInformationMessage("AI Gallery: Passing prompt completed.");
         }
         else {
             errorMessage = "Gallery prompt is empty. Please check the URL.";
@@ -62,11 +61,52 @@ export async function executePromptCmd(galleryPromptParameter: string) {
 
 }
 
+const sleep = (time: number) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true);
+      }, time);
+    });
+  }
+
 async function trySetupChat(): Promise<void> {
     await vscode.commands.executeCommand("workbench.action.chat.toggle");
     await new Promise(res => setTimeout(res, 1000));
     await vscode.commands.executeCommand("workbench.action.chat.triggerSetup");
-    await new Promise(res => setTimeout(res, 5000));
+    //vscode.window.showInformationMessage("AI Gallery: Chat is setup. Please wait for loading...");
+    //await new Promise(res => setTimeout(res, 30000));
+    const message = "AI Gallery: GitHub copilot chat is initializing, please wait...";
+    let customCancellationToken: vscode.CancellationTokenSource | null = null;
+
+    vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        cancellable: false
+      },
+      async (progress, token) => {
+        return new Promise((async (resolve) => {
+          customCancellationToken = new vscode.CancellationTokenSource();
+  
+          customCancellationToken.token.onCancellationRequested(() => {
+            customCancellationToken?.dispose();
+            customCancellationToken = null;  
+            vscode.window.showInformationMessage("Cancelled the progress");
+            resolve(null);
+            return;
+          });
+  
+          const seconds = 30;
+          const increase = 100 / seconds;
+          for (let i = 0; i < seconds; i++) {
+            // Increment is summed up with the previous value
+            progress.report({ increment: increase, message: `${message}` + Math.round(i * increase) + "%" });           
+            await sleep(1000);
+          }
+  
+          resolve(null);
+        }));
+      }
+    );
+    await new Promise(res => setTimeout(res, 30000));
 }
 
 
