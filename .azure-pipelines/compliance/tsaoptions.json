@@ -1,0 +1,17 @@
+{
+    "tsaVersion": "TsaV2",
+    "codeBase": "NewOrUpdate",
+    "codeBaseName": "ai-gallery-extension",
+    "tsaStamp": "DevDiv",
+    "notificationAliases": [
+        "lianw@microsoft.com"
+    ],
+    "codebaseAdmins": [
+        "FAREAST\\lianw",
+    ],
+    "instanceUrl": "https://devdiv.visualstudio.com",
+    "projectName": "DevDiv",
+    "areaPath": "DevDiv\\VS Azure Tools\\AzCode Extensions",
+    "iterationPath": "DevDiv",
+    "allTools": true
+}
