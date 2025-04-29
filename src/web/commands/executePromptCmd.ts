@@ -27,6 +27,9 @@ export async function executePromptCmd(galleryPromptParameter: string) {
             galleryPromptEncodedSize = galleryPromptEncoded.length;
             galleryPromptDecodedSize = JSON.stringify(galleryPromptdecoded).length;
 
+            await trySetupChat();
+            vscode.window.showInformationMessage("AI Gallery: Chat is setup. Passing prompt...");
+
             const success = await tryOpenPrompt(galleryPromptdecoded.p);
             if (success) {
                 executeResult = true;
@@ -34,6 +37,7 @@ export async function executePromptCmd(galleryPromptParameter: string) {
             else {
                 errorMessage = "Failed to open the prompt.";
             }
+            vscode.window.showInformationMessage("AI Gallery: Passing prompt completed.");
         }
         else {
             errorMessage = "Gallery prompt is empty. Please check the URL.";
@@ -57,6 +61,14 @@ export async function executePromptCmd(galleryPromptParameter: string) {
     }
 
 }
+
+async function trySetupChat(): Promise<void> {
+    await vscode.commands.executeCommand("workbench.action.chat.toggle");
+    await new Promise(res => setTimeout(res, 1000));
+    await vscode.commands.executeCommand("workbench.action.chat.triggerSetup");
+    await new Promise(res => setTimeout(res, 5000));
+}
+
 
 async function tryOpenPrompt(prompt: string, retries = 3, delay = 1000): Promise<boolean> {
     for (let attempt = 0; attempt < retries; attempt++) {
