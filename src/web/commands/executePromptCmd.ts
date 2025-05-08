@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { decodingUserPrompt, decodingUserPromptJson } from './helper';
-import { aiConnectionString } from '../constants';
+import { aiConnectionString, githubCopilotChatMode } from '../constants';
 import TelemetryReporter from '@vscode/extension-telemetry';
 
 export async function executePromptCmd(galleryPromptParameter: string) {
@@ -63,57 +63,53 @@ export async function executePromptCmd(galleryPromptParameter: string) {
 
 const sleep = (time: number) => {
     return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(true);
-      }, time);
+        setTimeout(() => {
+            resolve(true);
+        }, time);
     });
-  }
+}
 
 async function trySetupChat(): Promise<void> {
-    await vscode.commands.executeCommand("workbench.action.chat.toggle");
-    await new Promise(res => setTimeout(res, 1000));
     await vscode.commands.executeCommand("workbench.action.chat.triggerSetup");
-    //vscode.window.showInformationMessage("AI Gallery: Chat is setup. Please wait for loading...");
-    //await new Promise(res => setTimeout(res, 30000));
+    await vscode.commands.executeCommand("workbench.action.chat.open", { mode: githubCopilotChatMode });
     const message = "AI Gallery: GitHub copilot chat is initializing, please wait...";
     let customCancellationToken: vscode.CancellationTokenSource | null = null;
 
-    vscode.window.withProgress({
+    await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
         cancellable: false
-      },
-      async (progress, token) => {
-        return new Promise((async (resolve) => {
-          customCancellationToken = new vscode.CancellationTokenSource();
-  
-          customCancellationToken.token.onCancellationRequested(() => {
-            customCancellationToken?.dispose();
-            customCancellationToken = null;  
-            vscode.window.showInformationMessage("Cancelled the progress");
-            resolve(null);
-            return;
-          });
-  
-          const seconds = 30;
-          const increase = 100 / seconds;
-          for (let i = 0; i < seconds; i++) {
-            // Increment is summed up with the previous value
-            progress.report({ increment: increase, message: `${message}` + Math.round(i * increase) + "%" });           
-            await sleep(1000);
-          }
-  
-          resolve(null);
-        }));
-      }
+    },
+        async (progress, token) => {
+            return new Promise((async (resolve) => {
+                customCancellationToken = new vscode.CancellationTokenSource();
+
+                customCancellationToken.token.onCancellationRequested(() => {
+                    customCancellationToken?.dispose();
+                    customCancellationToken = null;
+                    vscode.window.showInformationMessage("Cancelled the progress");
+                    resolve(null);
+                    return;
+                });
+
+                const seconds = 30;
+                const increase = 100 / seconds;
+                for (let i = 0; i < seconds; i++) {
+                    // Increment is summed up with the previous value
+                    progress.report({ increment: increase, message: `${message}` + Math.round(i * increase) + "%" });
+                    await sleep(1000);
+                }
+
+                resolve(null);
+            }));
+        }
     );
-    await new Promise(res => setTimeout(res, 30000));
 }
 
 
 async function tryOpenPrompt(prompt: string, retries = 3, delay = 1000): Promise<boolean> {
     for (let attempt = 0; attempt < retries; attempt++) {
         try {
-            await vscode.commands.executeCommand("workbench.action.chat.open", prompt);
+            await vscode.commands.executeCommand("workbench.action.chat.open", { mode: githubCopilotChatMode, query: prompt });
             return true;
         } catch (err) {
             console.warn(`Attempt ${attempt + 1} failed to open chat. Retrying...`, err);
