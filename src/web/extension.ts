@@ -3,23 +3,30 @@
 import * as vscode from 'vscode';
 import { helloWorldCmd } from './commands/helloWorldCmd';
 import { executePromptCmd } from './commands/executePromptCmd';
+import { ext } from './extensionVariables';
+import { aiConnectionString } from './constants';
+import TelemetryReporter from '@vscode/extension-telemetry';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
-	
-	await executePromptCmd("");
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "AI Gallery" is now active in the web extension host!');
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let helloGallery = vscode.commands.registerCommand('ai-gallery.helloWorld', () => { helloWorldCmd(); });
-	let executePrompt = vscode.commands.registerCommand('ai-gallery.executePrompt', async (prompt: string) => { await executePromptCmd(prompt); });
 
-	context.subscriptions.push(helloGallery);
-	context.subscriptions.push(executePrompt);
+    ext.context = context;
+    ext.logger = vscode.window.createOutputChannel('AI Gallery Extension', { log: true });
+    context.subscriptions.push(ext.logger);
+    ext.reporter = new TelemetryReporter(aiConnectionString);
+    context.subscriptions.push(ext.reporter);
+
+    const extensionVersion = context.extension.packageJSON.version ?? 'unknown';
+    ext.logger.info(`Extension Version: ${extensionVersion}`);
+    ext.logger.info(`VS Code Version: ${vscode.version}`);
+
+    let helloGallery = vscode.commands.registerCommand('ai-gallery.helloWorld', () => { helloWorldCmd(); });
+    let executePrompt = vscode.commands.registerCommand('ai-gallery.executePrompt', async (prompt: string) => { await executePromptCmd(prompt); });
+    ext.logger.info(`Commands registered successfully.`);
+    await executePromptCmd("");
+    context.subscriptions.push(helloGallery);
+    context.subscriptions.push(executePrompt);
 }
 
 // This method is called when your extension is deactivated
