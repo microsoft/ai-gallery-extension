@@ -1,7 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { helloWorldCmd } from './commands/helloWorldCmd';
 import { executePromptCmd } from './commands/executePromptCmd';
 import { ext } from './extensionVariables';
 import { aiConnectionString } from './constants';
@@ -21,11 +20,9 @@ export async function activate(context: vscode.ExtensionContext) {
     ext.logger.info(`Extension Version: ${extensionVersion}`);
     ext.logger.info(`VS Code Version: ${vscode.version}`);
 
-    let helloGallery = vscode.commands.registerCommand('ai-gallery.helloWorld', () => { helloWorldCmd(); });
     let executePrompt = vscode.commands.registerCommand('ai-gallery.executePrompt', async (prompt: string) => { await executePromptCmd(prompt); });
     ext.logger.info(`Commands registered successfully.`);
     await executePromptCmd("");
-    context.subscriptions.push(helloGallery);
     context.subscriptions.push(executePrompt);
 }
 
