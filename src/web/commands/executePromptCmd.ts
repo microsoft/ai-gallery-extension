@@ -78,7 +78,7 @@ async function tryGetPromptFromUrl(promptEncoded: string, telemetryDate: any): P
 }
 
 async function trySetupChat(telemetryDate: any): Promise<void> {
-    let waitTimeForSeconds = 5;
+    let waitTimeForSeconds = 10;
     let loginStatus = false;
 
     ext.logger.info(`Starting setup GHCP chat.`);
@@ -111,7 +111,8 @@ async function trySetupChat(telemetryDate: any): Promise<void> {
 
     if (loginStatus) {
         ext.logger.info(`Waiting ${waitTimeForSeconds}s for setup.`)
-        await vscode.commands.executeCommand("workbench.action.chat.open", { mode: githubCopilotChatMode });
+        await vscode.commands.executeCommand("workbench.action.chat.newChat");
+        await vscode.commands.executeCommand("workbench.action.chat.openAgent");
         const message = "AI Gallery: GitHub copilot chat is initializing, please wait...";
         let customCancellationToken: vscode.CancellationTokenSource | null = null;
 
