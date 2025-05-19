@@ -3,7 +3,7 @@
   "displayName": "AI Gallery",
   "publisher": "ai-gallery",
   "description": "",
-  "version": "0.0.9",
+  "version": "0.0.12",
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -16,10 +16,6 @@
   "browser": "./dist/web/extension.js",
   "contributes": {
     "commands": [
-      {
-        "command": "ai-gallery.helloWorld",
-        "title": "HelloGallery"
-      },
       {
         "command": "ai-gallery.executePrompt",
         "title": "ExecutePrompt"

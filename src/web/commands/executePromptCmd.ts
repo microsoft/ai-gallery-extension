@@ -112,6 +112,7 @@ async function trySetupChat(telemetryDate: any): Promise<void> {
     if (loginStatus) {
         ext.logger.info(`Waiting ${waitTimeForSeconds}s for setup.`)
         await vscode.commands.executeCommand("workbench.action.chat.newChat");
+        await vscode.commands.executeCommand("workbench.action.chat.triggerSetup");
         await vscode.commands.executeCommand("workbench.action.chat.openAgent");
         const message = "AI Gallery: GitHub copilot chat is initializing, please wait...";
         let customCancellationToken: vscode.CancellationTokenSource | null = null;
