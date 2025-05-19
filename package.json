@@ -22,6 +22,10 @@
       }
     ]
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/ai-gallery-extension"
+  },
   "scripts": {
     "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
     "pretest": "npm run compile-web",
@@ -30,9 +34,13 @@
     "watch-web": "webpack --watch",
     "package-web": "webpack --mode production --devtool hidden-source-map",
     "lint": "eslint src --ext ts",
+    "lint-fix": "eslint src --ext ts --fix",
     "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. .",
     "host": "serve --ssl-cert localhost+1.pem --ssl-key localhost+1-key.pem --cors -l 3002",
-    "build": "npm run compile-web"
+    "build": "npm run compile-web",
+    "package": "vsce package",
+    "ci-package": "npm run ci-build && vsce package --allow-star-activation",
+    "ci-build": "npm run lint && npm run build"
   },
   "devDependencies": {
     "@types/assert": "^1.5.10",
