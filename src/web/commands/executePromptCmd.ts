@@ -48,7 +48,7 @@ const sleep = (time: number) => {
             resolve(true);
         }, time);
     });
-}
+};
 
 async function tryGetPromptFromUrl(promptEncoded: string, telemetryDate: any): Promise<any> {
     let galleryPromptEncoded = promptEncoded;
@@ -110,7 +110,7 @@ async function trySetupChat(telemetryDate: any): Promise<void> {
     }
 
     if (loginStatus) {
-        ext.logger.info(`Waiting ${waitTimeForSeconds}s for setup.`)
+        ext.logger.info(`Waiting ${waitTimeForSeconds}s for setup.`);
         await vscode.commands.executeCommand("workbench.action.chat.newChat");
         await vscode.commands.executeCommand("workbench.action.chat.triggerSetup");
         await vscode.commands.executeCommand("workbench.action.chat.openAgent");
@@ -148,7 +148,7 @@ async function trySetupChat(telemetryDate: any): Promise<void> {
         vscode.window.showInformationMessage("AI Gallery: Setup completed. Starting code generation. Please wait and retry in Chat if needed.");
     }
     else {
-        const message = `Failed to log in to GitHub.`
+        const message = `Failed to log in to GitHub.`;
         vscode.window.showErrorMessage("AI Gallery: Failed to log in to GitHub. Please check your account and retry from gallery site.");
         ext.logger.info(message);
         throw new Error(message);
